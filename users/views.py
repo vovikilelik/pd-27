@@ -7,14 +7,13 @@ from django.http import JsonResponse
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
-from django.views.generic import DetailView
+from django.views.generic import DetailView, DeleteView, CreateView, UpdateView
 
 from share.schemes.list_request import ListRequestScheme
 from share.utils.db_utils import create_user_model
 from share.utils.request_utils import filter_or_not
 from users.models import User
 from users.schemes.detail_scheme import DetailScheme
-from users.schemes.short_scheme import ShortScheme
 
 
 @method_decorator(csrf_exempt, name='dispatch')
@@ -30,20 +29,12 @@ class Users(View):
 
         return JsonResponse(
             {
-                'items': [ShortScheme.serialize(i) for i in page],
+                'items': [DetailScheme.serialize(i) for i in page],
                 'page': page.number,
                 'total': paginator.count
             },
             safe=False
         )
-
-    def post(self, request):
-        data = json.loads(request.body)
-
-        user = create_user_model(data)
-
-        user.save()
-        return JsonResponse(DetailScheme.serialize(user))
 
 
 @method_decorator(csrf_exempt, name='dispatch')
@@ -55,8 +46,41 @@ class UserDetail(DetailView):
 
         return JsonResponse(DetailScheme.serialize(category))
 
+
+@method_decorator(csrf_exempt, name='dispatch')
+class UserDelete(DeleteView):
+    model = User
+
     def delete(self, request, *args, **kwargs):
         self.get_object().delete()
 
         return JsonResponse({'status': 'ok'}, status=200)
 
+
+@method_decorator(csrf_exempt, name='dispatch')
+class UserCreate(CreateView):
+    model = User
+
+    def post(self, request, *args, **kwargs):
+        data = json.loads(request.body)
+
+        user = create_user_model(data)
+        user.save()
+
+        return JsonResponse(DetailScheme.serialize(user))
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+class UserUpdate(UpdateView):
+    model = User
+
+    def put(self, request, *args, **kwargs):
+        data = json.loads(request.body)
+
+        if 'id' not in data:
+            return JsonResponse({'status': 'Bad request'}, status=400)
+
+        user = create_user_model(data)
+        user.save()
+
+        return JsonResponse(DetailScheme.serialize(user))

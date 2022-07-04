@@ -34,8 +34,12 @@ def dict_to_location(item):
     location.save()
 
 
+def create_user_model_csv(location_id, **data_dict):
+    return create_user_model({**data_dict, 'locations': [location_id]})
+
+
 def dict_to_user(item):
-    user = create_user_model(item)
+    user = create_user_model_csv(**item)
     user.save()
 
 

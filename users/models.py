@@ -13,7 +13,7 @@ class User(models.Model):
     role = models.CharField(max_length=20)
     age = models.IntegerField()
 
-    location = models.ForeignKey(Location, on_delete=models.CASCADE)
+    locations = models.ManyToManyField(Location)
 
     def __str__(self):
         return self.username

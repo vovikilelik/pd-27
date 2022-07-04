@@ -7,7 +7,7 @@ from django.http import JsonResponse, HttpResponse
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
-from django.views.generic import DetailView, UpdateView
+from django.views.generic import DetailView, UpdateView, DeleteView, CreateView
 
 from ads.models import Ad
 
@@ -46,14 +46,6 @@ class Ads(View):
             safe=False
         )
 
-    def post(self, request):
-        data = json.loads(request.body)
-
-        ad = create_ad_model(data)
-        ad.save()
-
-        return JsonResponse(AdDetailScheme.serialize(ad))
-
 
 @method_decorator(csrf_exempt, name='dispatch')
 class AdDetail(DetailView):
@@ -64,10 +56,44 @@ class AdDetail(DetailView):
 
         return JsonResponse(AdDetailScheme.serialize(ad))
 
+
+@method_decorator(csrf_exempt, name='dispatch')
+class AdDelete(DeleteView):
+    model = Ad
+
     def delete(self, request, *args, **kwargs):
         self.get_object().delete()
 
         return JsonResponse({'status': 'ok'}, status=200)
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+class AdCreate(CreateView):
+    model = Ad
+
+    def post(self, request, *args, **kwargs):
+        data = json.loads(request.body)
+
+        ad = create_ad_model(data)
+        ad.save()
+
+        return JsonResponse(AdDetailScheme.serialize(ad))
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+class AdUpdate(UpdateView):
+    model = Ad
+
+    def put(self, request, *args, **kwargs):
+        data = json.loads(request.body)
+
+        if 'id' not in data:
+            return JsonResponse({'status': 'Bad request'}, status=400)
+
+        ad = create_ad_model(data)
+        ad.save()
+
+        return JsonResponse(AdDetailScheme.serialize(ad))
 
 
 @method_decorator(csrf_exempt, name='dispatch')

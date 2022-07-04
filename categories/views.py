@@ -7,7 +7,7 @@ from django.http import JsonResponse
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
-from django.views.generic import DetailView, DeleteView
+from django.views.generic import DetailView, DeleteView, CreateView, UpdateView
 
 from ads.models import Category
 from categories.schemes.detail_scheme import DetailScheme
@@ -35,13 +35,18 @@ class Categories(View):
             safe=False
         )
 
-    def post(self, request):
+
+@method_decorator(csrf_exempt, name='dispatch')
+class CategoryCreate(CreateView):
+    model = Category
+
+    def post(self, request, *args, **kwargs):
         data = json.loads(request.body)
 
         category = Category()
         category.name = data['name']
-
         category.save()
+
         return JsonResponse(DetailScheme.serialize(category))
 
 
@@ -54,8 +59,30 @@ class CategoryDetail(DetailView):
 
         return JsonResponse(DetailScheme.serialize(category))
 
+
+@method_decorator(csrf_exempt, name='dispatch')
+class CategoryDelete(DeleteView):
+    model = Category
+
     def delete(self, request, *args, **kwargs):
         self.get_object().delete()
 
         return JsonResponse({'status': 'ok'}, status=200)
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+class CategoryUpdate(UpdateView):
+    model = Category
+
+    def put(self, request, *args, **kwargs):
+        data = json.loads(request.body)
+
+        if 'id' not in data:
+            return JsonResponse({'status': 'Bad request'}, status=400)
+
+        category = Category()
+        category.name = data['name']
+        category.save()
+
+        return JsonResponse(DetailScheme.serialize(category))
 
