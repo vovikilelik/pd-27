@@ -81,6 +81,7 @@ class CategoryUpdate(UpdateView):
             return JsonResponse({'status': 'Bad request'}, status=400)
 
         category = Category()
+        category.id = data['id']
         category.name = data['name']
         category.save()
 
