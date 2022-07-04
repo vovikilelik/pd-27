@@ -125,3 +125,6 @@ f = Foo()
 
 p.proto()
 f.proto()
+
+print(-13 // 5)
+print(-13 % 5)

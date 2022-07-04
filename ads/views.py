@@ -85,12 +85,14 @@ class AdUpdate(UpdateView):
     model = Ad
 
     def put(self, request, *args, **kwargs):
+        ad = self.get_object()
+
+        if not ad:
+            return JsonResponse({'status': 'Not Found'}, status=404)
+
         data = json.loads(request.body)
 
-        if 'id' not in data:
-            return JsonResponse({'status': 'Bad request'}, status=400)
-
-        ad = create_ad_model(data)
+        ad = create_ad_model(data, ad)
         ad.save()
 
         return JsonResponse(AdDetailScheme.serialize(ad))

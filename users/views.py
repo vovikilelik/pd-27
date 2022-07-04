@@ -75,12 +75,14 @@ class UserUpdate(UpdateView):
     model = User
 
     def put(self, request, *args, **kwargs):
+        user = self.get_object()
+
+        if not user:
+            return JsonResponse({'status': 'Not Found'}, status=404)
+
         data = json.loads(request.body)
 
-        if 'id' not in data:
-            return JsonResponse({'status': 'Bad request'}, status=400)
-
-        user = create_user_model(data)
+        user = create_user_model(data, user)
         user.save()
 
         return JsonResponse(DetailScheme.serialize(user))

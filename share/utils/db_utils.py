@@ -2,9 +2,7 @@ from ads.models import User, Ad, Category
 from locations.models import Location
 
 
-def create_user_model(data_dict) -> User:
-    user = User()
-
+def create_user_model(data_dict, user=User()) -> User:
     if 'id' in data_dict:
         user.id = data_dict['id']
 
@@ -17,16 +15,12 @@ def create_user_model(data_dict) -> User:
 
     if 'locations' in data_dict:
         user.save()
-
-        for location_id in data_dict['locations']:
-            user.locations.add(Location.objects.get(pk=location_id))
+        user.locations.set(data_dict['locations'])
 
     return user
 
 
-def create_ad_model(data_dict) -> Ad:
-    ad = Ad()
-
+def create_ad_model(data_dict, ad=Ad()) -> Ad:
     if 'id' in data_dict:
         ad.id = data_dict['id']
 

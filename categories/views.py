@@ -75,13 +75,13 @@ class CategoryUpdate(UpdateView):
     model = Category
 
     def put(self, request, *args, **kwargs):
+        category = self.get_object()
+
+        if not category:
+            return JsonResponse({'status': 'Not Found'}, status=404)
+
         data = json.loads(request.body)
 
-        if 'id' not in data:
-            return JsonResponse({'status': 'Bad request'}, status=400)
-
-        category = Category()
-        category.id = data['id']
         category.name = data['name']
         category.save()
 
